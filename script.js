@@ -2,10 +2,13 @@ const image = document.querySelector("img");
 const title = document.querySelector("#title");
 const artist = document.querySelector("#artist");
 const music = document.querySelector("audio");
+const progressContainer = document.querySelector(".progress-container");
+const progress = document.querySelector(".progress");
 const prevBtn = document.querySelector("#prev");
 const playBtn = document.querySelector("#play");
 const nextBtn = document.querySelector("#next");
-
+const durationDisplay = document.querySelector("#duration");
+const currentTimeDisplay = document.querySelector("#current-time");
 // Check if Playing
 let isPlaying = false;
 
@@ -48,11 +51,11 @@ const pauseSong = function () {
 };
 // Load Song
 const loadSong = function (song) {
-  pauseSong();
   title.textContent = song.displayName;
   artist.textContent = song.artist;
   image.src = `./img/${song.name}.jpg`;
   music.src = `music/${song.name}.mp3`;
+  playSong();
 };
 // Current Song
 let currentSong = 0;
@@ -77,8 +80,37 @@ const nextSong = function () {
   }
 };
 
+// Update Progress Bar & time
+const updateProgressBar = function (e) {
+  if (!isPlaying) return;
+  const { duration, currentTime } = e.srcElement;
+  // Update progress bar width
+  const progressPercent = (currentTime / duration) * 100;
+  progress.style.width = `${progressPercent}%`;
+  // Update duration display
+  const durationMinutes = Math.floor(duration / 60);
+  let durationSeconds = Math.floor(duration % 60);
+  if (durationSeconds < 10) {
+    durationSeconds = `0${durationSeconds}`;
+  }
+  // Delayed switching duration
+  if (durationSeconds) {
+    durationDisplay.textContent = `${durationMinutes}:${durationSeconds}`;
+  }
+  // Update current time display
+  const currentMinutes = Math.floor(currentTime / 60);
+  let currentSeconds = Math.floor(currentTime % 60);
+  if (currentSeconds < 10) {
+    currentSeconds = `0${currentSeconds}`;
+  }
+  if (currentSeconds) {
+    currentTimeDisplay.textContent = `${currentMinutes}:${currentSeconds}`;
+  }
+};
+
 playBtn.addEventListener("click", () =>
   !isPlaying ? playSong() : pauseSong()
 );
 prevBtn.addEventListener("click", prevSong);
 nextBtn.addEventListener("click", nextSong);
+music.addEventListener("timeupdate", updateProgressBar);
